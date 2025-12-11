@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Khám Phá Bản Thân – MBTI 10 Câu</title>
+
+<style>
+        body {
+                font-family: Poppins, sans-serif;
+                background: linear-gradient(135deg, #dbeaff, #f5f9ff);
+                margin: 0;
+                padding: 0;
+        }
+
+        .container {
+                max-width: 900px;
+                margin: 40px auto;
+                background: #ffffff;
+                padding: 30px;
+                border-radius: 25px;
+                box-shadow: 0 6px 25px rgba(0,0,0,0.12);
+                animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2 {
+                text-align: center;
+                color: #3666d8;
+                margin-bottom: 20px;
+        }
+
+        .btn {
+                display: block;
+                width: 100%;
+                padding: 15px;
+                font-size: 18px;
+                border: none;
+                border-radius: 12px;
+                background: linear-gradient(135deg, #4f7cff, #6ea8ff);
+                color: white;
+                cursor: pointer;
+                margin-top: 20px;
+                transition: 0.2s;
+        }
+        .btn:hover { transform: scale(1.03); }
+
+        .question {
+                background: #f7faff;
+                padding: 18px;
+                border-radius: 18px;
+                margin-bottom: 20px;
+                border: 1px solid #d8e7ff;
+        }
+
+        label { display: block; margin: 8px 0; cursor: pointer; }
+
+        #quiz-page, #result-page { display: none; }
+
+        #result-box {
+                background: #ecf8ee;
+                padding: 20px;
+                border-left: 5px solid #55c27b;
+                border-radius: 15px;
+                font-size: 18px;
+        }
+</style>
+</head>
+
+<body>
+
+<!-- HOME PAGE -->
+<div class="container" id="home-page">
+        <h1>Khám Phá Bản Thân – MBTI</h1>
+        <h2>Bài trắc nghiệm 10 câu dành cho học sinh THCS</h2>
+
+        <button class="btn" onclick="startQuiz()">Bắt đầu trắc nghiệm</button>
+</div>
+
+<!-- QUIZ PAGE -->
+<div class="container" id="quiz-page">
+        <h2>Bài Trắc Nghiệm MBTI 10 Câu</h2>
+
+        <div id="question-list"></div>
+
+        <button class="btn" onclick="submitQuiz()">Hoàn thành</button>
+</div>
+
+<!-- RESULT PAGE -->
+<div class="container" id="result-page">
+        <h2>Kết Quả Của Bạn</h2>
+        <div id="result-box"></div>
+
+        <button class="btn" onclick="goHome()">Quay về</button>
+</div>
+
+<script>
+// ----------- DANH SÁCH CÂU HỎI MBTI 10 CÂU ------------
+const questions = [
+        // I / E
+        { q: "Khi gặp khó khăn, bạn thường:", A: "I", B: "E",
+            a1: "Tự suy nghĩ tìm cách giải quyết",
+            a2: "Nhờ người khác tư vấn hoặc trò chuyện"
+        },
+        { q: "Cuối tuần bạn thích:", A: "E", B: "I",
+            a1: "Đi chơi với bạn bè", a2: "Ở nhà nghỉ ngơi, làm việc riêng"
+        },
+        { q: "Trong nhóm, bạn thường:", A: "E", B: "I",
+            a1: "Là người khởi xướng nói chuyện", a2: "Lắng nghe nhiều hơn"
+        },
+
+        // S / N
+        { q: "Bạn thích kiểu bài học:", A: "S", B: "N",
+            a1: "Rõ ràng, có ví dụ cụ thể", a2: "Mang tính sáng tạo, nhiều ý tưởng"
+        },
+        { q: "Khi làm bài nhóm, bạn:", A: "S", B: "N",
+            a1: "Làm theo kế hoạch cố định", a2: "Thích thay đổi cách làm"
+        },
+        { q: "Bạn ghi nhớ tốt hơn khi:", A: "S", B: "N",
+            a1: "Có hình ảnh – chi tiết", a2: "Có ý nghĩa – thông điệp"
+        },
+
+        // T / F
+        { q: "Khi phải góp ý bạn mình, bạn:", A: "T", B: "F",
+            a1: "Nói thẳng vấn đề", a2: "Chọn lời nói khéo để bạn không buồn"
+        },
+        { q: "Bạn đưa ra quyết định dựa trên:", A: "T", B: "F",
+            a1: "Lý trí – logic", a2: "Cảm xúc – quan hệ"
+        },
+
+        // J / P
+        { q: "Bạn thích thời gian biểu:", A: "J", B: "P",
+            a1: "Lên kế hoạch rõ ràng", a2: "Linh hoạt, tùy hứng"
+        },
+        { q: "Khi làm bài tập, bạn:", A: "J", B: "P",
+            a1: "Làm sớm để khỏi lo", a2: "Thường gần sát hạn mới làm"
+        },
+];
+
+// ----------- RENDER CÂU HỎI ------------
+function startQuiz() {
+        document.getElementById("home-page").style.display = "none";
+        document.getElementById("quiz-page").style.display = "block";
+
+        let html = "";
+        questions.forEach((q, i) => {
+                html += `
+                <div class='question'>
+                        <p><b>${i+1}. ${q.q}</b></p>
+                        <label><input type="radio" name="q${i}" value="${q.A}"> ${q.a1}</label>
+                        <label><input type="radio" name="q${i}" value="${q.B}"> ${q.a2}</label>
+                </div>`;
+        });
+        document.getElementById("question-list").innerHTML = html;
+}
+
+// ----------- TÍNH KẾT QUẢ MBTI ------------
+function submitQuiz() {
+        let score = { I:0, E:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+
+        for (let i = 0; i < questions.length; i++) {
+                let answer = document.querySelector(`input[name="q${i}"]:checked`);
+                if (!answer) {
+                        alert("Bạn cần trả lời đầy đủ tất cả các câu!");
+                        return;
+                }
+                score[answer.value]++;
+        }
+
+        let MBTI = "";
+        MBTI += score.I > score.E ? "I" : "E";
+        MBTI += score.S > score.N ? "S" : "N";
+        MBTI += score.T > score.F ? "T" : "F";
+        MBTI += score.J > score.P ? "J" : "P";
+
+        let desc = {
+                "INTJ": "Chiến lược gia – Tư duy logic, thích lập kế hoạch.",
+                "INFJ": "Người cố vấn – Thấu hiểu, giàu lý tưởng.",
+                "ISTJ": "Người trách nhiệm – Kỷ luật, đáng tin cậy.",
+                "ENFP": "Người truyền cảm hứng – Nhiệt huyết, sáng tạo.",
+                "ESFP": "Người thích khám phá – Thân thiện, năng động."
+        };
+
+        let resultText = `<h3 style='color:#3a7fd5'>MBTI của bạn: <b>${MBTI}</b></h3>`;
+        resultText += desc[MBTI] ? desc[MBTI] : "Bạn có kiểu tính cách cân bằng và linh hoạt.";
+
+        document.getElementById("result-box").innerHTML = resultText;
+
+        document.getElementById("quiz-page").style.display = "none";
+        document.getElementById("result-page").style.display = "block";
+}
+
+function goHome() {
+        document.getElementById("result-page").style.display = "none";
+        document.getElementById("home-page").style.display = "block";
+}
+</script>
+
+</body>
+</html>
